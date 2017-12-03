@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.myspringpacks.model">
+	<class name="User" table="tbl_user">
+		<id name="user_id" column="user_id">
+			<generator class="native"/>
+		</id>
+		<property name="user_name" column="user_name">
+		</property>
+		
+		<property name="user_contactno" column="user_contactno">
+		</property>
+		
+		<property name="user_username" column="user_username">
+		</property>
+		
+		<property name="user_password" column="user_password">
+		</property>
+		
+		<property name="user_status" column="user_status">
+		</property>
+	</class>
+	
+</hibernate-mapping>

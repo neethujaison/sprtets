@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.myspringpacks.model">
+	<class name="Customer" table="tbl_user">
+		<id name="customer_id" column="customer_id">
+			<generator class="native" />
+		</id>
+		<property name="customer_name" column="customer_name">
+		</property>
+
+		<property name="customer_address" column="customer_address">
+		</property>
+
+		<property name="country_id" column="country_id">
+		</property>
+
+		<property name="city_id" column="city_id">
+		</property>
+
+		<property name="customer_phoneno" column="customer_phoneno">
+		</property>
+		<property name="customer_email" column="customer_email">
+		</property>
+
+		<property name="customer_dob" column="customer_dob">
+		</property>
+
+		<property name="doctype_id" column="doctype_id">
+		</property>
+
+		<property name="document_no" column="document_no">
+		</property>
+		<property name="document_country_id" column="document_country_id">
+		</property>
+		<property name="national_id" column="national_id">
+		</property>
+		<property name="customer_status" column="customer_status">
+		</property>
+
+	</class>
+
+</hibernate-mapping>
