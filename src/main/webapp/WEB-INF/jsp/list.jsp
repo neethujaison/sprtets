@@ -9,7 +9,26 @@
 
 </head>
 <body>
-	list goes here
+	<h2>List goes here</h2><br/>
+	<form name="serachForm" method="post" action="search">
+	<div class="row">
+	     <div class="small-3 columns">
+	        <input type="text" id="txt" name="searchString">
+	      </div>
+	<br/>
+	       <div class="small-5 columns end">
+	         <button id="button-id" type="submit">Search List</button>
+	       </div>
+	
+	   </div>
+	</form>
+	 <div class="row">
+	      <div>
+	         ${searchTerm}
+	     </div>
+	</div>
+	
+	<br/>
 	<table border="1">
 		<tr>
 			<th>User Id</th>
@@ -29,5 +48,11 @@
 				<td><a href="editUser/${user.user_id}">Edit</a><br/><a href="deleteUser/${user.user_id}">Delete</a></td>
 			</tr>
 		</c:forEach>
+		</table>
+		 <br/>  
+   <a href="showList/1">1</a>   
+   <a href="showList/2">2</a>   
+   <a href="showList/3">3</a>  
+		
 </body>
 </html>

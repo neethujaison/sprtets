@@ -9,12 +9,10 @@ import com.myspringpacks.entity.UserForm;
 
 public class CustomerValidator implements Validator{
 
-	@Override
 	public boolean supports(Class<?> clazz) {
 		return CustomerForm.class.isAssignableFrom(clazz);
 	}
 
-	@Override
 	public void validate(Object target, Errors errors) {
 		// TODO Auto-generated method stub
 		CustomerForm customer = (CustomerForm) target;

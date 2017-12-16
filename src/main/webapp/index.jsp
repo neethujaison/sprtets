@@ -13,5 +13,10 @@
 
 Trade Demo goes here<br/>
 <a href="customerRegistration">Customer Registration </a> 
+<br/>
+<br/>
+------------AHM ----------------<br/>
+<a href="submitAhm">Submit AHM</a><br/>
+
 </body>
 </html>

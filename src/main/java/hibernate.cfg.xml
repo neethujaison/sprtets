@@ -9,7 +9,9 @@
     <mapping resource="com/myspringpacks/model/User.hbm.xml"/>
     <mapping resource="com/myspringpacks/model/UploadFile.hbm.xml"/>
     <mapping resource="com/myspringpacks/model/Customer.hbm.xml"/>
-    <mapping resource="com/myspringpacks/model/Country.hbm.xml"/>
     <mapping resource="com/myspringpacks/model/City.hbm.xml"/>
+     <mapping resource="com/myspringpacks/model/Ahm.hbm.xml"/>
+     <mapping resource="com/myspringpacks/model/Fhl.hbm.xml"/>
+     <mapping resource="com/myspringpacks/model/Hawbs.hbm.xml"/>
   </session-factory>
 </hibernate-configuration>
