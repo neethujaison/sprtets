@@ -263,27 +263,48 @@ public class ListController {
 		return new ModelAndView("uploadFHL");
 	}
 
-	@RequestMapping(value = "/uploadAttachment.htm", method = RequestMethod.POST)
-	public @ResponseBody String addAttachment(MultipartHttpServletRequest request, HttpServletResponse response
-			) throws IOException {
-		List<FileUploadDTO> list = new ArrayList<FileUploadDTO>();
-		if (request.getMultiFileMap().get("file-0") != null) {
-			for (MultipartFile file : request.getMultiFileMap().get("file-0")) {
-				System.out.println("here-----------" + file.getName());
-				FileUploadDTO fileUploadDTO = new FileUploadDTO();
-				fileUploadDTO.setFileName(file.getName());
-				fileUploadDTO.setFileFormat(file.getContentType());
-				fileUploadDTO.setFileSize(file.getSize());
-				list.add(fileUploadDTO);
+	/*
+	 * @RequestMapping(value = "/uploadAttachment.htm", method =
+	 * RequestMethod.POST) public @ResponseBody String
+	 * addAttachment(MultipartHttpServletRequest request, HttpServletResponse
+	 * response ) throws IOException { List<FileUploadDTO> list = new
+	 * ArrayList<FileUploadDTO>(); if (request.getMultiFileMap().get("file-0")
+	 * != null) { for (MultipartFile file :
+	 * request.getMultiFileMap().get("file-0")) {
+	 * System.out.println("here-----------" + file.getName()); FileUploadDTO
+	 * fileUploadDTO = new FileUploadDTO();
+	 * fileUploadDTO.setFileName(file.getName());
+	 * fileUploadDTO.setFileFormat(file.getContentType());
+	 * fileUploadDTO.setFileSize(file.getSize()); list.add(fileUploadDTO);
+	 * 
+	 * } } FileUploadDTO fileUploadDTO2 = new FileUploadDTO();
+	 * fileUploadDTO2.setFileName("neethu.pdf");
+	 * fileUploadDTO2.setFileFormat("pdf"); fileUploadDTO2.setFileSize(20L);
+	 * list.add(fileUploadDTO2); return new Gson().toJson(list);
+	 * 
+	 * }
+	 */
 
-			}
-		}
+	@RequestMapping(value = "/uploadAttachment.json", method = RequestMethod.POST, headers = {
+			"Accept=text/xml, application/json" }, produces = "application/json")
+	public @ResponseBody List addAttachment(MultipartHttpServletRequest request, HttpServletResponse response,
+			HttpSession session) throws IOException {
+		List<FileUploadDTO> list = new ArrayList<FileUploadDTO>();
+		FileUploadDTO fileUploadDTO = new FileUploadDTO();
+		fileUploadDTO.setFileName("nitz.pdf");
+		fileUploadDTO.setFileFormat("txt");
+		fileUploadDTO.setFileSize(30L);
+		list.add(fileUploadDTO);
+
 		FileUploadDTO fileUploadDTO2 = new FileUploadDTO();
 		fileUploadDTO2.setFileName("neethu.pdf");
 		fileUploadDTO2.setFileFormat("pdf");
 		fileUploadDTO2.setFileSize(20L);
 		list.add(fileUploadDTO2);
-		return new Gson().toJson(list);
+		String str = "UploadedFinally";
+		// return "{\"UploadedFinally\":1}";
+		// return new Gson().toJson(str);
+		return list;
 
 	}
 
