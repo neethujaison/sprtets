@@ -289,22 +289,74 @@ public class ListController {
 			"Accept=text/xml, application/json" }, produces = "application/json")
 	public @ResponseBody List addAttachment(MultipartHttpServletRequest request, HttpServletResponse response,
 			HttpSession session) throws IOException {
-		List<FileUploadDTO> list = new ArrayList<FileUploadDTO>();
+		List<FileUploadDTO> errorFilesList = new ArrayList<FileUploadDTO>();
+		List<FileUploadDTO> correctFilesList = new ArrayList<FileUploadDTO>();
 		FileUploadDTO fileUploadDTO = new FileUploadDTO();
 		fileUploadDTO.setFileName("nitz.pdf");
 		fileUploadDTO.setFileFormat("txt");
 		fileUploadDTO.setFileSize(30L);
-		list.add(fileUploadDTO);
+		
+		List<String> errorList = new ArrayList<String>();
+		errorList.add("File format not correct");
+		errorList.add("File Size not correct");
+		
+		List<String> errorList2 = new ArrayList<String>();
+		errorList2.add("File Size not correct");
+		
+		fileUploadDTO.setErrorList(errorList );
+		errorFilesList.add(fileUploadDTO);
 
 		FileUploadDTO fileUploadDTO2 = new FileUploadDTO();
 		fileUploadDTO2.setFileName("neethu.pdf");
 		fileUploadDTO2.setFileFormat("pdf");
 		fileUploadDTO2.setFileSize(20L);
-		list.add(fileUploadDTO2);
+		fileUploadDTO2.setErrorList(errorList2);
+		errorFilesList.add(fileUploadDTO2);
+		
+		List<String> errorList3 = new ArrayList<String>();
+		errorList3.add("File format not correct");
+		errorList3.add("File Size not correct");
+		
+		FileUploadDTO fileUploadDTO3 = new FileUploadDTO();
+		fileUploadDTO3.setFileName("papa.xml");
+		fileUploadDTO3.setFileFormat("xml");
+		fileUploadDTO3.setFileSize(70L);
+		fileUploadDTO3.setErrorList(errorList3);
+		errorFilesList.add(fileUploadDTO3);
+		FileUploadDTO fileUploadDTOgen;
+		
+		//file.getSize() > 100000 check for 10MB
+		for (MultipartFile file : request.getMultiFileMap().get("multipartFile")) {
+			 System.out.println("here-----------" + file.getName()); 
+			 fileUploadDTOgen = new FileUploadDTO();
+			 fileUploadDTOgen.setFileName(file.getOriginalFilename());
+			 fileUploadDTOgen.setFileFormat(file.getContentType());
+			 fileUploadDTOgen.setFileSize(file.getSize()); 
+			 if(true){//haserrors check goes here
+				
+				 fileUploadDTOgen.setErrorList(errorList3);
+				 errorFilesList.add(fileUploadDTOgen);
+			 }else{
+				 correctFilesList.add(fileUploadDTOgen);
+				// call uploadFunction here
+				System.out.println("here-----------" );
+				
+			 }
+		}
+		
+		
 		String str = "UploadedFinally";
+		
+		 
+		 List <String>resultList = new ArrayList<String>();
+		 resultList.add(errorFilesList.size()+"");
+		 resultList.add(correctFilesList.size()+"");
+		 for(FileUploadDTO errorFile:errorFilesList){
+			 resultList.add(errorFile.getFileName()+"-"+errorFile.getErrorList().get(0));
+		 }
 		// return "{\"UploadedFinally\":1}";
 		// return new Gson().toJson(str);
-		return list;
+		return resultList;
 
 	}
 
