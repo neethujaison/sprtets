@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springmodules.validation.valang.ValangValidator;
+
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,13 +20,16 @@ import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.StringUtils;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -83,6 +88,10 @@ public class ListController {
 
 	@Autowired
 	private MultipleFileValidator multipleFileValidator;
+	
+	@Autowired
+	@Qualifier("fileValidationList")
+	ValangValidator fileValidationList;
 
 	@ModelAttribute
 	public MultiFileModel multiFileModel() {
@@ -93,7 +102,7 @@ public class ListController {
 	public void dataBinding(WebDataBinder binder) {
 		// binder.addValidators(userValidator);
 		// binder.addValidators(customerValidator);
-		binder.setValidator(multipleFileValidator);
+	//	binder.setValidator(multipleFileValidator);
 	}
 
 	@RequestMapping(value = "/showList/{pageid}")
@@ -263,88 +272,54 @@ public class ListController {
 		return new ModelAndView("uploadFHL");
 	}
 
-	/*
-	 * @RequestMapping(value = "/uploadAttachment.htm", method =
-	 * RequestMethod.POST) public @ResponseBody String
-	 * addAttachment(MultipartHttpServletRequest request, HttpServletResponse
-	 * response ) throws IOException { List<FileUploadDTO> list = new
-	 * ArrayList<FileUploadDTO>(); if (request.getMultiFileMap().get("file-0")
-	 * != null) { for (MultipartFile file :
-	 * request.getMultiFileMap().get("file-0")) {
-	 * System.out.println("here-----------" + file.getName()); FileUploadDTO
-	 * fileUploadDTO = new FileUploadDTO();
-	 * fileUploadDTO.setFileName(file.getName());
-	 * fileUploadDTO.setFileFormat(file.getContentType());
-	 * fileUploadDTO.setFileSize(file.getSize()); list.add(fileUploadDTO);
-	 * 
-	 * } } FileUploadDTO fileUploadDTO2 = new FileUploadDTO();
-	 * fileUploadDTO2.setFileName("neethu.pdf");
-	 * fileUploadDTO2.setFileFormat("pdf"); fileUploadDTO2.setFileSize(20L);
-	 * list.add(fileUploadDTO2); return new Gson().toJson(list);
-	 * 
-	 * }
-	 */
 
 	@RequestMapping(value = "/uploadAttachment.json", method = RequestMethod.POST, headers = {
 			"Accept=text/xml, application/json" }, produces = "application/json")
 	public @ResponseBody List addAttachment(MultipartHttpServletRequest request, HttpServletResponse response,
 			HttpSession session) throws IOException {
+		System.out.println("Enetered----------------");
 		List<FileUploadDTO> errorFilesList = new ArrayList<FileUploadDTO>();
 		List<FileUploadDTO> correctFilesList = new ArrayList<FileUploadDTO>();
-		FileUploadDTO fileUploadDTO = new FileUploadDTO();
-		fileUploadDTO.setFileName("nitz.pdf");
-		fileUploadDTO.setFileFormat("txt");
-		fileUploadDTO.setFileSize(30L);
 		
-		List<String> errorList = new ArrayList<String>();
-		errorList.add("File format not correct");
-		errorList.add("File Size not correct");
-		
-		List<String> errorList2 = new ArrayList<String>();
-		errorList2.add("File Size not correct");
-		
-		fileUploadDTO.setErrorList(errorList );
-		errorFilesList.add(fileUploadDTO);
-
-		FileUploadDTO fileUploadDTO2 = new FileUploadDTO();
-		fileUploadDTO2.setFileName("neethu.pdf");
-		fileUploadDTO2.setFileFormat("pdf");
-		fileUploadDTO2.setFileSize(20L);
-		fileUploadDTO2.setErrorList(errorList2);
-		errorFilesList.add(fileUploadDTO2);
-		
-		List<String> errorList3 = new ArrayList<String>();
-		errorList3.add("File format not correct");
-		errorList3.add("File Size not correct");
-		
-		FileUploadDTO fileUploadDTO3 = new FileUploadDTO();
-		fileUploadDTO3.setFileName("papa.xml");
-		fileUploadDTO3.setFileFormat("xml");
-		fileUploadDTO3.setFileSize(70L);
-		fileUploadDTO3.setErrorList(errorList3);
-		errorFilesList.add(fileUploadDTO3);
-		FileUploadDTO fileUploadDTOgen;
 		
 		//file.getSize() > 100000 check for 10MB
+		Double totalFileSize=0.0;
+		int totalNoOfFilesPerUpload=0;
 		for (MultipartFile file : request.getMultiFileMap().get("multipartFile")) {
+			FileUploadDTO fileUploadDTO = new FileUploadDTO();
 			 System.out.println("here-----------" + file.getName()); 
-			 fileUploadDTOgen = new FileUploadDTO();
-			 fileUploadDTOgen.setFileName(file.getOriginalFilename());
-			 fileUploadDTOgen.setFileFormat(file.getContentType());
-			 fileUploadDTOgen.setFileSize(file.getSize()); 
-			 if(true){//haserrors check goes here
+			 fileUploadDTO = new FileUploadDTO();
+			 fileUploadDTO.setFileName(file.getOriginalFilename());
+			 fileUploadDTO.setFileFormat(file.getContentType());
+			 
+			 Double size= (double) (file.getSize()/1024);
+			 fileUploadDTO.setFileSize(size); 
+			 
+			 totalFileSize= totalFileSize+size;
+			 fileUploadDTO.setTotalFileSize(totalFileSize);
+			 
+			 totalNoOfFilesPerUpload++;
+			 fileUploadDTO.setTotalNoOfFilesPerUpload(totalNoOfFilesPerUpload);
+			 
+			 
+			 Errors fileErrors= new BeanPropertyBindingResult(fileUploadDTO, "fileUploadDTO");
+			 fileValidationList.validate(fileUploadDTO, fileErrors);
+			 System.out.println("errors-----------"+fileErrors );
+			 if(fileErrors.hasErrors()){//haserrors check goes here
 				
-				 fileUploadDTOgen.setErrorList(errorList3);
-				 errorFilesList.add(fileUploadDTOgen);
+				 fileUploadDTO.setErrorList(fileErrors.getAllErrors().get(0).getDefaultMessage());
+				 errorFilesList.add(fileUploadDTO);
+				
 			 }else{
-				 correctFilesList.add(fileUploadDTOgen);
+				 correctFilesList.add(fileUploadDTO);
 				// call uploadFunction here
-				System.out.println("here-----------" );
+				
 				
 			 }
 		}
 		
-		
+		 System.out.println("Error Files-----------" +errorFilesList.size());
+		 System.out.println("Correct Files-----------" +correctFilesList.size());
 		String str = "UploadedFinally";
 		
 		 
@@ -352,10 +327,8 @@ public class ListController {
 		 resultList.add(errorFilesList.size()+"");
 		 resultList.add(correctFilesList.size()+"");
 		 for(FileUploadDTO errorFile:errorFilesList){
-			 resultList.add(errorFile.getFileName()+"-"+errorFile.getErrorList().get(0));
+			 resultList.add(errorFile.getFileName()+":"+errorFile.getErrorList());
 		 }
-		// return "{\"UploadedFinally\":1}";
-		// return new Gson().toJson(str);
 		return resultList;
 
 	}
@@ -486,11 +459,15 @@ public class ListController {
 		ahm.setMawb_number(ahmForm.getMawbno());
 		ahm.setNoofpieces(ahmForm.getNoofpieces());
 		ahm.setWeight(ahmForm.getWeight());
+
+		//finding mawbno sum 
+		int cnt  = userDao.findCount(ahmForm.getMawbno());
 		int ahmId = 0;
 		if (ahm != null)
 			ahmId = userDao.addAhm(ahm);
 		System.out.println("Ahm id:" + ahmId);
 		session.setAttribute("Ahm", ahm);
+		
 		return new ModelAndView("/addUserSuccess", "msg", "AHM saved in draft");
 
 	}
