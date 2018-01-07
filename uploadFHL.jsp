@@ -6,11 +6,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <script src="http://code.jquery.com/jquery-1.7.1.js"></script>
-<script src="<c:url value="/resources/js/ajaxfileupload.js" />"></script>
-<script
-	src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-<script
-	src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/jquery.dataTables.min.js"></script>
+<script src="resources/js/ajaxfileupload.js"></script>
 
 <script type="text/javascript">
 	function strip(html) {
@@ -24,8 +20,7 @@
 		})
 	})
 	function ajaxFileUpload() {
-		$
-				.ajaxFileUpload({
+				$.ajaxFileUpload({
 					url : 'uploadAttachment.json', // Server request address for file upload
 					type : 'post',
 					secureuri : false, // Do you need a security protocol ， Generally set to false
@@ -37,20 +32,31 @@
 						newdata = strip(data);
 						console.log(data);
 						//alert(newdata);
-						json = JSON.parse(newdata);
-						alert(json[0]);
-						alert(json[1]);
-						alert(json[2]);
-						alert(json[3]);
-						var trs = "<table id='#errorTbl'><thead><tr><td>FileName</td><td>Errors</td></tr></thead><tbody>";
-						for (var i = 2; i < json.length; i++) {
-							var tmp = json[i].split("-");
-							trs += "<tr>";
-							trs += "<td>" + tmp[0] + "</td>";
-							trs += "<td>" + tmp[1] + "</td>";
+						var json = JSON.parse(newdata);
+						if(String(json[0]) == "FileError"){
+							alert(11);
+							var trs = "<table id='#errorTbl'><thead><tr><td>FileName</td><td>Errors</td></tr></thead><tbody>";
+							for (var i = 3; i < json.length; i++) {
+								var tmp = json[i].split(":");
+								trs += "<tr>";
+								trs += "<td>" + tmp[0] + "</td>";
+								trs += "<td>" + tmp[1] + "</td>";
+							}
+							trs += "</tbody></table>";
+							$('#tableInfo').parent().html(trs);
+							
+						}else if(String(json[0]) == "SystemError"){
+							alert(22);
+							var trs = "<table id='#errorTbl'><thead><tr><td>System Errors</td></tr></thead><tbody>";
+							for (var i = 1; i < json.length; i++) {
+								trs += "<tr>";
+								trs += "<td>" + json[i] + "</td>";
+							}
+							trs += "</tbody></table>";
+							$('#tableInfo').parent().html(trs);
+							
 						}
-						trs += "</tbody></table>";
-						$('#tableInfo').parent().html(trs);
+						
 						if (typeof (data.error) != 'undefined') {
 							if (data.error != '') {
 								alert(data.error);
@@ -67,81 +73,8 @@
 		return false;
 	}
 </script>
-<script type="text/javascript">
-	var count = 0;
 
-	$(document).ready(function() {
-		$('table#myTable').dataTable({
-			'bFilter' : false,
-			'bInfo' : false,
-			'bPaginate' : false,
-		});
 
-		// Add initial row
-		addRow("neethu", "jaison");
-	});
-
-	function addRow(first, second) {
-		$('table#myTable').dataTable().fnAddData(
-				[ '<input type="text" name="' + first + '">',
-				  '<input type="text" name="' + second + '">' ]);
-
-		count++;
-	}
-</script>
-<script type="text/javascript">
-	/*function uploadAttachmentUsingAjax() {
-
-		$.AjaxFileUpload({
-			url : 'uploadAttachment.htm',
-			secureuri : false,
-			fileElementId : multipartfile,
-			async : false,
-			success : function(data) {
-
-				alert('uploaded');
-				alert(data);
-
-			},
-			error : function(request, status, error) {
-				alert(request.responseText);
-			}
-		});
-	}
-
-	function uploadFormData() {
-		//$('#result').html('');
-		var data = new FormData();
-
-		jQuery.each(jQuery('#file')[0].files, function(i, file) {
-			data.append('file-' + i, file);
-		});
-		$
-				.ajax({
-					url : 'uploadAttachment.htm',
-					data : data,
-					processData : false,
-					contentType : false,
-					type : 'POST',
-					success : function(data) {
-						json = JSON.parse(data);
-						var trs = "<table id='#errorTbl'><thead><tr><td>FileName</td><td>Errors</td></tr></thead><tbody>";
-						for (var i = 0; i < json.length; i++) {
-							trs += "<tr>";
-							trs += "<td>" + json[i].fileName + "</td>";
-							trs += "<td>" + json[i].fileFormat + "</td>";
-						}
-						trs += "</tbody></table>";
-						$('#tableInfo').parent().html(trs);
-						alert('success');
-
-					},
-					error : function(request, status, error) {
-						alert(request.responseText);
-					}
-				//});
-	}*/
-</script>
 <title>fhl upload</title>
 </head>
 <body>

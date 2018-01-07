@@ -30,6 +30,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -280,11 +281,19 @@ public class ListController {
 		System.out.println("Enetered----------------");
 		List<FileUploadDTO> errorFilesList = new ArrayList<FileUploadDTO>();
 		List<FileUploadDTO> correctFilesList = new ArrayList<FileUploadDTO>();
-		
+		List <String>resultList = new ArrayList<String>();
 		
 		//file.getSize() > 100000 check for 10MB
 		Double totalFileSize=0.0;
 		int totalNoOfFilesPerUpload=0;
+		List<Errors> systemErrors= validateFiles(request.getMultiFileMap().get("multipartFile"));
+		if(systemErrors!= null && !systemErrors.isEmpty()){
+			resultList.add("SystemError");
+			for(ObjectError error:systemErrors.get(0).getAllErrors()){
+				resultList.add(error.getDefaultMessage());
+			}
+			
+		}else{
 		for (MultipartFile file : request.getMultiFileMap().get("multipartFile")) {
 			FileUploadDTO fileUploadDTO = new FileUploadDTO();
 			 System.out.println("here-----------" + file.getName()); 
@@ -295,11 +304,11 @@ public class ListController {
 			 Double size= (double) (file.getSize()/1024);
 			 fileUploadDTO.setFileSize(size); 
 			 
-			 totalFileSize= totalFileSize+size;
-			 fileUploadDTO.setTotalFileSize(totalFileSize);
+			// totalFileSize= totalFileSize+size;
+			// fileUploadDTO.setTotalFileSize(totalFileSize);
 			 
-			 totalNoOfFilesPerUpload++;
-			 fileUploadDTO.setTotalNoOfFilesPerUpload(totalNoOfFilesPerUpload);
+			// totalNoOfFilesPerUpload++;
+			 //fileUploadDTO.setTotalNoOfFilesPerUpload(totalNoOfFilesPerUpload);
 			 
 			 
 			 Errors fileErrors= new BeanPropertyBindingResult(fileUploadDTO, "fileUploadDTO");
@@ -323,14 +332,37 @@ public class ListController {
 		String str = "UploadedFinally";
 		
 		 
-		 List <String>resultList = new ArrayList<String>();
+		 resultList.add("FileError");
 		 resultList.add(errorFilesList.size()+"");
 		 resultList.add(correctFilesList.size()+"");
 		 for(FileUploadDTO errorFile:errorFilesList){
 			 resultList.add(errorFile.getFileName()+":"+errorFile.getErrorList());
 		 }
+		}
 		return resultList;
 
+	}
+
+	private List<Errors> validateFiles(List<MultipartFile> list) {
+		int configTotalNoOFilesPerUpload=10;
+		List<Errors> errorList=new ArrayList<Errors>();
+		Double totalFileSize=0.0;
+		if(list!= null && !list.isEmpty()){
+			int size=list.size();
+			FileUploadDTO fileUploadDTO= new FileUploadDTO();
+			fileUploadDTO.setTotalNoOfFilesPerUpload(size);
+			
+			for (MultipartFile file : list) {
+				Double sizeOfFile= (double) (file.getSize()/1024);
+				totalFileSize= totalFileSize+sizeOfFile;
+			}
+			fileUploadDTO.setTotalFileSize(totalFileSize);
+			Errors fileErrors= new BeanPropertyBindingResult(fileUploadDTO, "fileUploadDTO");
+			fileValidationList.validate(fileUploadDTO, fileErrors);
+			errorList.add(fileErrors);	 
+		}
+		
+		return errorList;
 	}
 
 	@RequestMapping(value = "/multipleFileUpload", method = RequestMethod.GET)
