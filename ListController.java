@@ -351,10 +351,15 @@ public class ListController {
 			int size=list.size();
 			FileUploadDTO fileUploadDTO= new FileUploadDTO();
 			fileUploadDTO.setTotalNoOfFilesPerUpload(size);
-			
+			Double configFileSize=(double) 1;
 			for (MultipartFile file : list) {
-				Double sizeOfFile= (double) (file.getSize()/1024);
-				totalFileSize= totalFileSize+sizeOfFile;
+				double sizeOfFile= file.getSize();
+				double kilobytes = sizeOfFile / 1024;
+				double megabytes = kilobytes/1024;
+				totalFileSize= totalFileSize+megabytes;
+			}
+			if(totalFileSize> configFileSize){
+				System.out.println("Total size of all files greater than 3");
 			}
 			fileUploadDTO.setTotalFileSize(totalFileSize);
 			Errors fileErrors= new BeanPropertyBindingResult(fileUploadDTO, "fileUploadDTO");
