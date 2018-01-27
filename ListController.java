@@ -45,7 +45,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import org.springframework.web.servlet.ModelAndView;
-
+import org.springframework.web.bind.annotation.SessionAttributes;
 import com.google.gson.Gson;
 import com.myspringpacks.dao.CntryDAO;
 import com.myspringpacks.dao.UserDAO;
@@ -63,6 +63,7 @@ import com.myspringpacks.model.City;
 import com.myspringpacks.model.Customer;
 import com.myspringpacks.model.Fhl;
 import com.myspringpacks.model.Hawbs;
+import com.myspringpacks.model.Hdr;
 import com.myspringpacks.model.UploadFile;
 import com.myspringpacks.model.User;
 import com.myspringpacks.validator.CustomerValidator;
@@ -490,7 +491,7 @@ public class ListController {
 	public ModelAndView submitAhmProcess(@ModelAttribute("ahmForm") AhmForm ahmForm, HttpServletRequest request,
 			HttpServletResponse response, HttpSession session, ModelMap modelMap) {
 
-		System.out.println("Adding AHM starts here");
+		/*System.out.println("Adding AHM starts here");
 		Ahm ahm = new Ahm();
 		ahm.setCmn_ref_transaction_type_id(6);
 		ahm.setMawb_number(ahmForm.getMawbno());
@@ -498,15 +499,95 @@ public class ListController {
 		ahm.setWeight(ahmForm.getWeight());
 
 		//finding mawbno sum 
-		int cnt  = userDao.findCount(ahmForm.getMawbno());
+		//int cnt  = userDao.findCount(ahmForm.getMawbno());
 		int ahmId = 0;
 		if (ahm != null)
 			ahmId = userDao.addAhm(ahm);
 		System.out.println("Ahm id:" + ahmId);
-		session.setAttribute("Ahm", ahm);
+		session.setAttribute("Ahm", ahm);*/
+		System.out.println("Send Email Code starts here");
 		
+		//CRAFHLHeader is Hdr
+		//CRAAHMDetailStg is Ahm
+		List<Ahm> ahmList=null;
+		List<Integer> parentAhmIdList=new ArrayList<Integer>();
+		List<Hdr> submittedFHLList=userDao.fetchFHLList();
+		
+		if(submittedFHLList !=null && !submittedFHLList.isEmpty()){
+			for(Hdr fhl:submittedFHLList){
+				if(!parentAhmIdList.contains(fhl.getParentAhmId())){
+					parentAhmIdList.add(fhl.getParentAhmId());
+				}
+			}
+		}
+		
+		if(parentAhmIdList!=null && !parentAhmIdList.isEmpty()){
+			parentAhmIdList= removeDuplicates(parentAhmIdList);
+			ahmList= userDao.getAhmDtlStgByParentAhmId(parentAhmIdList);
+		}
+		Map<Integer,List<Integer>> parentAhmFHLMap=frameMap(parentAhmIdList,submittedFHLList);
+		if(ahmList!=null && !ahmList.isEmpty()){
+			for(Ahm ahm:ahmList){
+				if(ahm.getMawb_number()!=null){
+					if(sendEmail(ahm.getMawb_number())){
+						updateFHLMailStatus(ahm.getParentAhmId(),parentAhmFHLMap);
+					}
+				}
+			}
+		}
 		return new ModelAndView("/addUserSuccess", "msg", "AHM saved in draft");
 
+	}
+
+	private Map<Integer, List<Integer>> frameMap(List<Integer> parentAhmIdList, List<Hdr> submittedFHLList) {
+		Map<Integer,List<Integer>> parentAhmFHLMap= new HashMap<Integer,List<Integer>>();
+		
+		if(parentAhmIdList!=null && !parentAhmIdList.isEmpty()){
+			for(Integer parentAhmId:parentAhmIdList){
+				
+					List<Integer> fhlIds=new ArrayList<Integer>();
+					for(Hdr fhl:submittedFHLList){
+						if(fhl.getParentAhmId()==parentAhmId){
+							fhlIds.add(fhl.getCra_fhl_upload_header_id());
+						}
+					}
+					parentAhmFHLMap.put(parentAhmId,fhlIds);
+				
+			}
+		}
+		return parentAhmFHLMap;
+	}
+
+	private void updateFHLMailStatus(int parentAhmId,Map<Integer,List<Integer>> parentAhmFHLMap) {
+		if(parentAhmId!=0){
+			if(parentAhmFHLMap!=null &&!parentAhmFHLMap.isEmpty()){
+				Iterator<Map.Entry<Integer,List<Integer>>> itr1 = parentAhmFHLMap.entrySet().iterator();
+				while(itr1.hasNext()) {
+				    Map.Entry<Integer,List<Integer>> entry = itr1.next();
+				    if(entry.getKey().equals(parentAhmId)){
+				    	List<Integer> fhlList= entry.getValue();
+				    	userDao.updateFHLMailStatus(fhlList);
+				    }
+				}
+			}
+		}
+		
+		
+	}
+
+	private Boolean sendEmail(String mawb_number) {
+		Boolean mailSent=false;
+		if(mawb_number!=null){
+			System.out.println("Send Email"+mawb_number);
+			mailSent=true;
+		}
+		return mailSent;
+		
+	}
+
+	private List<Integer> removeDuplicates(List<Integer> parentAhmIdList) {
+		// TODO Auto-generated method stub
+		return parentAhmIdList;
 	}
 
 	@RequestMapping(value = "/addHawb", method = RequestMethod.GET)
