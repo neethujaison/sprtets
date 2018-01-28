@@ -513,17 +513,18 @@ public class ListController {
 		List<Integer> parentAhmIdList=new ArrayList<Integer>();
 		List<Hdr> submittedFHLList=userDao.fetchFHLList();
 		
-		if(submittedFHLList !=null && !submittedFHLList.isEmpty()){
+		/*if(submittedFHLList !=null && !submittedFHLList.isEmpty()){
 			for(Hdr fhl:submittedFHLList){
 				if(!parentAhmIdList.contains(fhl.getParentAhmId())){
 					parentAhmIdList.add(fhl.getParentAhmId());
 				}
 			}
-		}
+		}*/
+		parentAhmIdList= userDao.fetchParentIdList();
 		
 		if(parentAhmIdList!=null && !parentAhmIdList.isEmpty()){
-			parentAhmIdList= removeDuplicates(parentAhmIdList);
-			ahmList= userDao.getAhmDtlStgByParentAhmId(parentAhmIdList);
+			//parentAhmIdList= removeDuplicates(parentAhmIdList);
+			//ahmList= userDao.getAhmDtlStgByParentAhmId(parentAhmIdList);
 		}
 		Map<Integer,List<Integer>> parentAhmFHLMap=frameMap(parentAhmIdList,submittedFHLList);
 		if(ahmList!=null && !ahmList.isEmpty()){
